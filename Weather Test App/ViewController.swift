@@ -17,6 +17,7 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
     
     @IBOutlet var table: UITableView!
     var types = [DailyWeatherEntry]()
+    var hourlyTypes = [HourlyWeatherEntry]()
     
     let locationManager = CLLocationManager()
     var currentLocation: CLLocation?
@@ -74,6 +75,7 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
             self.types.append(contentsOf: entries)
             let current = result.currently
             self.current = current
+            self.hourlyTypes = result.hourly.data
             DispatchQueue.main.async {
                 self.table.reloadData()
                 self.table.tableHeaderView = self.createTableHeader()
@@ -132,7 +134,7 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         locationLabel.textAlignment = .center
         
         guard let currentWeather = self.current else { return UIView() }
-        tempLabel.text = "\(currentWeather.temperature)"
+        tempLabel.text = "\(currentWeather.temperature)°"
         summaryLabel.text = self.current?.summary
         
         tempLabel.font = UIFont(name: "Helvetica-Bold", size: 32)
@@ -145,11 +147,24 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         locationManager.startUpdatingLocation()
     }
     
+    func numberOfSections(in tableView: UITableView) -> Int {
+        return 2
+    }
+    
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        if section == 0 {
+            return 1
+        }
+        
         return types.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        if indexPath.section == 0 {
+            let cell = tableView.dequeueReusableCell(withIdentifier: HourlyTableViewCell.identifier, for: indexPath) as! HourlyTableViewCell
+            cell.configure(with: hourlyTypes)
+            return cell
+        }
         let cell = tableView.dequeueReusableCell(withIdentifier: WeatherTableViewCell.identifier, for: indexPath) as! WeatherTableViewCell
         cell.configure(with: types[indexPath.row])
         return cell
