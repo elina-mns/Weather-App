@@ -39,9 +39,9 @@ class WeatherTableViewCell: UITableViewCell {
         self.highTempLabel.text = "\(Int(model.temperatureHigh))°"
         self.dayLabel.text = getDayForDate(Date(timeIntervalSince1970: Double(model.time)))
         let icon = model.icon.lowercased()
-        if icon.contains("clear1") {
+        if icon.contains("clear") {
             self.iconImageView.image = UIImage(named: "clear1")
-        } else if icon.contains("rain1") {
+        } else if icon.contains("rain") {
             self.iconImageView.image = UIImage(named: "rain1")
         } else {
             self.iconImageView.image = UIImage(named: "cloud1")

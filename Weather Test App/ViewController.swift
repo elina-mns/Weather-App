@@ -19,8 +19,8 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
     var types = [DailyWeatherEntry]()
     
     let locationManager = CLLocationManager()
-    
     var currentLocation: CLLocation?
+    var current: CurrentWeather?
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -72,12 +72,71 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
             
             let entries = result.daily.data
             self.types.append(contentsOf: entries)
+            let current = result.currently
+            self.current = current
             DispatchQueue.main.async {
                 self.table.reloadData()
+                self.table.tableHeaderView = self.createTableHeader()
             }
             //Update user interface
             
         }) .resume()
+    }
+    
+    func createTableHeader() -> UIView {
+        let headerView = UIView(frame: CGRect(x: 0, y: 0, width: view.frame.size.width, height: view.frame.size.width))
+        let locationLabel = UILabel(frame: CGRect(x: 10, y: 10, width: view.frame.size.width-20, height: headerView.frame.size.height/5))
+        let summaryLabel = UILabel(frame: CGRect(x: 10, y: 20+locationLabel.frame.size.height, width: view.frame.size.width-20, height: headerView.frame.size.height/5))
+        let tempLabel = UILabel(frame: CGRect(x: 10, y: 20+locationLabel.frame.size.height+summaryLabel.frame.size.height, width: view.frame.size.width-20, height: headerView.frame.size.height/2))
+
+        headerView.addSubview(locationLabel)
+        headerView.addSubview(summaryLabel)
+        headerView.addSubview(tempLabel)
+        
+    
+        let icon = current?.icon.lowercased() ?? ""
+        if icon.contains("clear") {
+            let myCustomView = UIImageView()
+            let myImage: UIImage = UIImage(named: "clear")!
+            myCustomView.image = myImage
+            headerView.insertSubview(myCustomView, at: 0)
+            myCustomView.translatesAutoresizingMaskIntoConstraints = false
+            myCustomView.leadingAnchor.constraint(equalTo: headerView.leadingAnchor, constant: 0).isActive = true
+            myCustomView.trailingAnchor.constraint(equalTo: headerView.trailingAnchor, constant: 0).isActive = true
+            myCustomView.bottomAnchor.constraint(equalTo: headerView.bottomAnchor, constant: 0).isActive = true
+            myCustomView.topAnchor.constraint(equalTo: headerView.topAnchor, constant: 0).isActive = true
+        } else if icon.contains("rain") {
+            let myCustomView = UIImageView()
+            let myImage: UIImage = UIImage(named: "rain")!
+            myCustomView.image = myImage
+            headerView.insertSubview(myCustomView, at: 0)
+            myCustomView.translatesAutoresizingMaskIntoConstraints = false
+            myCustomView.leadingAnchor.constraint(equalTo: headerView.leadingAnchor, constant: 0).isActive = true
+            myCustomView.trailingAnchor.constraint(equalTo: headerView.trailingAnchor, constant: 0).isActive = true
+            myCustomView.bottomAnchor.constraint(equalTo: headerView.bottomAnchor, constant: 0).isActive = true
+            myCustomView.topAnchor.constraint(equalTo: headerView.topAnchor, constant: 0).isActive = true
+        } else {
+            let myCustomView = UIImageView()
+            let myImage: UIImage = UIImage(named: "foggy")!
+            myCustomView.image = myImage
+            headerView.insertSubview(myCustomView, at: 0)
+            myCustomView.translatesAutoresizingMaskIntoConstraints = false
+            myCustomView.leadingAnchor.constraint(equalTo: headerView.leadingAnchor, constant: 0).isActive = true
+            myCustomView.trailingAnchor.constraint(equalTo: headerView.trailingAnchor, constant: 0).isActive = true
+            myCustomView.bottomAnchor.constraint(equalTo: headerView.bottomAnchor, constant: 0).isActive = true
+            myCustomView.topAnchor.constraint(equalTo: headerView.topAnchor, constant: 0).isActive = true
+        }
+    
+        tempLabel.textAlignment = .center
+        summaryLabel.textAlignment = .center
+        locationLabel.textAlignment = .center
+        
+        guard let currentWeather = self.current else { return UIView() }
+        tempLabel.text = "\(currentWeather.temperature)"
+        summaryLabel.text = self.current?.summary
+        
+        tempLabel.font = UIFont(name: "Helvetica-Bold", size: 32)
+        return headerView
     }
     
     func setupLocation() {
